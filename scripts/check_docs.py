@@ -29,7 +29,8 @@ def main():
             errors.append(f"{relative}: required document missing or empty")
 
     paths = sorted(set(ROOT.glob("*.md")) | set((ROOT / "docs").rglob("*.md"))
-                   | set((ROOT / ".github").rglob("*.md")))
+                   | set((ROOT / ".github").rglob("*.md"))
+                   | set((ROOT / "nvim").rglob("*.md")))
     link_count = 0
     for path in paths:
         relative = path.relative_to(ROOT)

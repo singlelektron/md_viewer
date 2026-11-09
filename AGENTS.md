@@ -5,13 +5,17 @@
 Read [docs/PRODUCT.md](docs/PRODUCT.md) for approved intent and open decisions,
 [README.md](README.md) for project entry points, and
 [docs/OWNER_GUIDE.md](docs/OWNER_GUIDE.md) for operation and verification.
-[docs/TECHNOLOGY_OPTIONS.md](docs/TECHNOLOGY_OPTIONS.md) records proposals only.
+[docs/TECHNOLOGY_OPTIONS.md](docs/TECHNOLOGY_OPTIONS.md) records historical alternatives;
+the product scope is authoritative for the selected implementation.
 Keep one authoritative home for each requirement and link to it elsewhere.
 
-The owner requested repository initialization and analysis before implementation.
-Do not create a Cargo package, application, renderer, or Neovim integration until
-the owner chooses a route and authorizes development. Document proposed choices
-as proposals; do not present them as accepted requirements or implemented behavior.
+The owner selected a minimal Tauri desktop window, Rust application logic,
+static web presentation, KaTeX for ordinary inline math, and live unsaved Neovim
+updates. Linux and macOS are design targets; macOS tests are explicitly deferred.
+The default translucent Moonlit theme follows the inspected Kitty colors. Keep
+the app local/offline at runtime, source notes unchanged, and Neovim installation
+opt-in. Do not expand into advanced LaTeX or replace the user's editor workflow.
+Keep proposals distinct from accepted requirements and measured behavior.
 English is the default for repository documents and technical instructions;
 respond to the owner in their conversational language.
 
@@ -29,6 +33,10 @@ a local diff and PR-style handoff. Remote creation/pushes, visibility/access or
 protection changes, publication, deployment, and merging require authorization
 covering those actions. PR authorization includes its branch push, not merging.
 Honor authorization already given without repeatedly asking for it.
+
+Current authorization includes public synchronization to `singlelektron/md_viewer`
+on GitHub and the associated task branch/PR. It does not authorize merging into
+`main`, signing installers, or publishing releases.
 
 Ask for missing owner decisions when changing material product scope, governance,
 authorization boundaries, security/privacy/data guarantees, significant costs,
@@ -57,20 +65,28 @@ an approved implementation do not need an approval ceremony.
 Current commands, from the repository root:
 
 ```sh
+npm ci --ignore-scripts
+npm run build
+cargo build --locked
+cargo test --no-default-features --locked
+node frontend/app.test.cjs
+python3 tests/test_nvim_bridge.py
 python3 scripts/check_docs.py
 git diff --check main...HEAD
 ```
 
 For another PR base, use its actual base instead of `main`. A clean uncommitted
-diff does not validate committed changes. Add build/run and behavior checks only
-when implementation exists. Validate affected outcomes and failures in proportion
-to risk; use disposable fixtures for data/recovery checks and never real notes
+diff does not validate committed changes. Use Rust 1.90+, Node.js 22.12+, and the
+documented Tauri platform dependencies. Rebuild frontend assets before building
+the desktop binary. Validate affected outcomes and failures in proportion to
+risk; use disposable fixtures for data/recovery checks and never real notes
 for destructive experiments. High-consequence releases need suitable human review.
 
 Use [.github/pull_request_template.md](.github/pull_request_template.md) for PRs
 or local handoffs. Report local checks, hosted CI, AI review, human acceptance,
 merge, and deployment separately. Do not claim a working product from structural
-checks. Update commands and instructions when the project becomes runnable.
+checks. Desktop behavior needs actual WebView evidence. Do not infer macOS runtime
+support from Linux results; keep the owner's deferred testing boundary explicit.
 
 When work and relevant checks are complete, use a normal review-ready PR; drafts
 are for incomplete work or requested early review. Let configured CI and available

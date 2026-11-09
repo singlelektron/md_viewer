@@ -1,6 +1,9 @@
 # Technology options
 
-Status: **proposal for owner selection; no route is approved or implemented**.
+Status: **historical pre-implementation comparison**. The owner subsequently
+selected the dedicated Tauri window, ordinary inline math, unsaved live updates,
+and Kitty-matched visual presets. [PRODUCT.md](PRODUCT.md) now defines the selected
+scope; the recommendations below are retained as the earlier evaluation.
 Official sources checked on 2026-11-09. Relative effort assessments below are
 engineering judgments, not measured performance or compatibility results.
 See [PRODUCT.md](PRODUCT.md) for the actual requirements and open questions.

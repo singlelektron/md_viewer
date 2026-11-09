@@ -1,52 +1,110 @@
 # Owner guide
 
-## What is available
+## Build and use
 
-This repository currently provides a project definition and a technology
-comparison. It does not install or launch a previewer. Review
-[PRODUCT.md](PRODUCT.md) and [TECHNOLOGY_OPTIONS.md](TECHNOLOGY_OPTIONS.md), then
-select the display route, update behavior, and math compatibility needed for
-your notes. Application development remains paused until that decision.
+Follow the [README](../README.md) for platform prerequisites and build commands.
+Open `examples/notes.md` with `target/debug/md-viewer` to try saved-file mode.
+Start with no file to see connection instructions; `--help` lists CLI options.
 
-## Local verification
+For actual typing-time preview, follow the [Neovim setup](../nvim/README.md), then
+run `:MdViewerStart` in a Markdown buffer. This integration sends the buffer,
+including unsaved content; the separate file mode only sees saved text. It never
+saves the buffer automatically. Existing `MarkdownPreview` commands and shortcuts
+are not replaced.
 
-From the repository root, with Git and Python 3.10 or newer:
+Use the window's theme selector for Moonlit, Graphite, or Paper. The choice is
+session-only. To choose a startup theme from a terminal:
 
 ```sh
-python3 scripts/check_docs.py
-git diff --check main...HEAD
-git status --short --branch
-git log --oneline --decorate -5
-git diff --stat main...HEAD
+./target/debug/md-viewer --theme graphite examples/notes.md
 ```
 
-Expected results: the checker reports its file and link counts with no errors;
-the diff check produces no output; the working tree is clean after handoff.
-`main` is the initial empty baseline, and planning changes are on
-`codex/bootstrap-planning`. These checks do not test application behavior.
+Moonlit follows the inspected Kitty colors and 0.86 background opacity. Actual
+appearance also depends on the compositor, WebView, and installed fonts. macOS
+is a supported design target whose tests are deferred; it is not verified by
+Linux screenshots or build results.
 
-The checker validates required documentation, final newlines, trailing
-whitespace, and simple inline Markdown links to local files. It deliberately
-does not fetch external URLs, validate anchors, or implement a full Markdown parser.
+## Verification
 
-## CI and publishing
+From the repository root:
 
-[Documentation CI](../.github/workflows/docs.yml) is configured for GitHub pull
-requests and pushes to `main`. It has read-only repository permissions and does
-not deploy. No remote, hosted CI result, or branch protection is established by
-this local initialization. Remote creation/publication needs authorization for
-the destination and visibility; merging needs authorization covering the merge.
+```sh
+npm ci --ignore-scripts
+npm run build
+cargo build --locked
+cargo test --no-default-features --locked
+node frontend/app.test.cjs
+python3 tests/test_nvim_bridge.py
+python3 scripts/check_docs.py
+git diff --check main...HEAD
+```
 
-## Data and recovery
+The Rust checks exercise document/protocol behavior without desktop dependencies.
+Frontend tests cover browser-side update behavior. The Neovim test uses a clean
+headless editor and fake child process to exercise actual buffer events, including
+Insert-mode completion, switching, reloads, and child lifecycle. It verifies that
+a saved fixture remains unchanged; it does not run the desktop renderer.
 
-There is no application data store, configuration, cache, or migration yet. This
-phase does not read or modify personal notes or Neovim configuration. Planning
-documents live in Git; inspect previous committed versions with `git show`.
-Use a reviewed revert commit on a task branch to undo a committed change instead
-of discarding unrelated working files. Local Git history is not an off-device
-backup; keep a separate copy before destructive filesystem operations.
+On Linux with an active desktop and `WebKitWebDriver` installed, run the native
+integration check after building:
 
-If a documentation check fails, fix the reported line or link and run it again.
-If Git commands fail, verify that the command is running from the repository
-root and that Git metadata is accessible; do not reinitialize or erase history
-as a troubleshooting shortcut.
+```sh
+python3 tests/test_desktop.py
+```
+
+This opens disposable preview windows and a clean Neovim, sends unsaved text
+through the Lua bridge and a test pipe relay into the real application, and
+checks native KaTeX layout, themes, saved-file replacement, error recovery, and
+unchanged note bytes. Reports and window screenshots go to ignored
+`artifacts/desktop/`. No personal notes or editor settings are used. Inspect the
+screenshots too: DOM presence alone does not prove visible formula glyphs.
+
+For desktop acceptance, launch the built app and perform the cases in
+[PRODUCT.md](PRODUCT.md): edit an unsaved formula, leave it incomplete and fix it,
+switch notes, select each theme, check Linux translucency, and run without
+networking. Record the actual result and revision in the handoff or PR. Do not
+interpret documentation checks, a successful build, or mocked frontend tests as
+a rendered desktop acceptance result. macOS testing is intentionally excluded
+from this first verification round.
+
+The documentation checker verifies required documents, final newlines, trailing
+whitespace, and simple inline links to local files. It does not fetch external
+URLs, validate anchors, or implement a complete Markdown parser.
+
+## Troubleshooting
+
+- **No window from Neovim:** check the configured executable path and `:messages`.
+  Try that executable from a terminal, then use `:MdViewerStart` again.
+- **Edits only appear after saving:** the viewer was opened in file mode; use the
+  Neovim bridge for unsaved updates.
+- **A formula shows source/error text:** finish its delimiters/braces or check the
+  KaTeX-supported command set. Full LaTeX document/package support is outside scope.
+- **A large note stops updating:** the 1 MiB note or 2 MiB encoded-message limit
+  was reached. Shorten the note; the prior preview is retained until valid input
+  arrives.
+- **Themes/fonts differ:** Moonlit needs compositor transparency support; the UI
+  uses locally installed fonts with fallbacks. Try Graphite for an opaque view.
+- **Missing Linux WebView libraries:** install the Tauri prerequisites listed in
+  the README for the actual distribution, then rebuild. Do not change compositor
+  or global graphics settings merely because a build dependency is missing.
+
+## Data, recovery, and publication
+
+Notes remain in their existing files or unsaved Neovim buffers. There is no note
+library, application-managed preferences file, or data migration. Renderer state
+and theme choice are in memory; the system WebView may maintain its own engine
+cache/runtime data. Closing the preview does not close or save the editor buffer.
+Restart the viewer and resend/reopen the note to recover a preview; Neovim remains
+responsible for saving and recovering unsaved editing work.
+
+The app does not modify Kitty, Neovim, or desktop configuration. Remove the
+opt-in runtime-path/setup entries from your own editor configuration to uninstall
+its integration. No installer or global deployment is performed by a build.
+
+Public GitHub synchronization is authorized for `singlelektron/md_viewer`.
+Work belongs on task branches; `main` began as an empty bootstrap baseline.
+Inspect the current PR/handoff for publication, hosted CI, and review results.
+A local workflow file does not establish a hosted pass or branch protection.
+Configured CI runs Linux build/lint, Rust core, frontend, and headless Neovim
+checks; the native desktop check is local and macOS checks are excluded.
+Merging, signing, and publishing release installers remain separate decisions.

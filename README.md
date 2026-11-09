@@ -1,34 +1,66 @@
 # md_viewer
 
-A planned Rust Markdown previewer for notes written in Neovim, with mathematical
-notation as a primary concern.
+A quiet desktop Markdown preview for Neovim. Rust handles document state, input,
+and Markdown parsing; a Tauri window presents static HTML/CSS and bundled KaTeX.
+The interface stays small: note title, connection status, and a theme selector.
 
-**Status: repository initialization and technology evaluation only.** The owner
-has requested a technology decision before application implementation. There is
-no preview executable, Cargo package, Neovim plugin, or chosen rendering stack yet.
+The default **Moonlit** theme follows the owner's Kitty palette: translucent
+`#18131f` at 86% opacity, `#f1e8f1` text, and a muted rose accent. **Graphite** is
+an opaque dark alternative; **Paper** is a light alternative. Theme selection is
+per session. No terminal or editor settings are modified.
 
-## Start here
+Linux is the current validation platform. macOS is a design/build target using
+Tauri's system WebView; macOS compilation, runtime, and appearance tests are
+explicitly deferred. Cross-platform support is not a completed test result.
 
-- [Product scope](docs/PRODUCT.md): confirmed intent, open decisions, and proposed acceptance cases.
-- [Technology options](docs/TECHNOLOGY_OPTIONS.md): browser, desktop WebView, and native GUI alternatives.
-- [Owner guide](docs/OWNER_GUIDE.md): inspect and verify this planning repository.
-- [Agent instructions](AGENTS.md): development and authorization boundaries.
-- [Third-party notices](THIRD_PARTY_NOTICES.md): tooling references and incorporation status.
+## Build and open
 
-## Check the repository
+Requires Rust 1.90+, Node.js 22.12+, and the platform's Tauri prerequisites.
+Linux needs GTK 3 and WebKitGTK 4.1 development libraries; macOS needs Xcode
+command-line development tools. See the official
+[Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your platform.
 
-Requires Git and Python 3.10 or newer; the documentation checker uses only the
-Python standard library and needs no package installation.
+From the checkout root:
 
 ```sh
-python3 scripts/check_docs.py
-git diff --check main...HEAD
+npm ci --ignore-scripts
+npm run build
+cargo build --locked
+./target/debug/md-viewer examples/notes.md
 ```
 
-These checks validate documentation hygiene and local file links, not a Markdown
-previewer. Installation, application usage, Rust dependencies, and behavioral
-tests will be added after the owner selects a route and authorizes implementation.
+This file mode refreshes saved changes. For an optimized local executable, use
+`cargo build --release --locked` and `target/release/md-viewer`. A separate Tauri
+CLI, frontend development server, or Node.js process is not needed at runtime.
 
-The GitHub Actions workflow runs the same documentation check on pull requests
-and pushes to `main`. Its presence does not establish a hosted run or repository
-protection. A project distribution license has not been selected.
+## Preview while typing
+
+Use the [Neovim integration](nvim/README.md) to connect unsaved buffers. After
+adding its runtime path and configuring the executable, run `:MdViewerStart` in
+a Markdown buffer. `:MdViewerStop` closes it; `:MdViewerToggle` toggles it. New
+unnamed notes work after `:setfiletype markdown`, without an initial save.
+
+Inline formulas such as `$x^2 + y^2 = z^2$` render locally. The first version
+focuses on ordinary formulas, not arbitrary LaTeX packages or equation-reference
+systems. Raw HTML is displayed as text, images are omitted, and external links
+are inert. There is no note upload, runtime asset download, or local HTTP server.
+
+## Development and scope
+
+- [Product scope](docs/PRODUCT.md): selected requirements and acceptance cases.
+- [Owner guide](docs/OWNER_GUIDE.md): checks, troubleshooting, and data behavior.
+- [Agent instructions](AGENTS.md): development and authorization boundaries.
+- [Third-party notices](THIRD_PARTY_NOTICES.md): dependency and asset records.
+- [Earlier technology comparison](docs/TECHNOLOGY_OPTIONS.md): historical alternatives; the product scope is authoritative.
+
+```sh
+cargo test --no-default-features --locked
+node frontend/app.test.cjs
+python3 tests/test_nvim_bridge.py
+python3 scripts/check_docs.py
+```
+
+These cover different layers and do not replace a real desktop acceptance check.
+See the owner guide for that path. The repository is intended for public GitHub
+synchronization; the handoff/PR records actual hosted CI and publication status.
+A project distribution license has not yet been selected.

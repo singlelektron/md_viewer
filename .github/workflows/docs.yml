@@ -1,4 +1,4 @@
-name: Documentation
+name: Linux checks
 
 on:
   pull_request:
@@ -9,13 +9,48 @@ permissions:
   contents: read
 
 jobs:
-  documentation:
+  linux:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 25
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Check documentation
-        run: python3 scripts/check_docs.py
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26.13.0'
+      - name: Install Linux desktop development libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+      - name: Set up tested Rust toolchain
+        run: |
+          rustup toolchain install 1.96.0 --profile minimal --component rustfmt --component clippy
+          rustup default 1.96.0
+      - name: Install pinned Neovim
+        env:
+          NVIM_ARCHIVE: ${{ runner.temp }}/nvim-linux-x86_64.tar.gz
+        run: |
+          curl --fail --location --retry 3 https://github.com/neovim/neovim/releases/download/v0.12.6/nvim-linux-x86_64.tar.gz -o "$NVIM_ARCHIVE"
+          echo "474430d53e6264f6d6dd18db42d6dc9df3a1b56ca9e88a325bbf860e1a811d87  $NVIM_ARCHIVE" | sha256sum --check
+          tar -xzf "$NVIM_ARCHIVE" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
+      - name: Build offline presentation assets
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+      - name: Check documentation and formatting
+        run: |
+          python3 scripts/check_docs.py
+          cargo fmt --all -- --check
+      - name: Test Rust core, frontend behavior, and Neovim integration
+        run: |
+          cargo test --locked --no-default-features
+          node frontend/app.test.cjs
+          python3 tests/test_nvim_bridge.py
+      - name: Build and lint the desktop application
+        run: |
+          cargo build --locked
+          cargo clippy --locked --all-targets -- -D warnings

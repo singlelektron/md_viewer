@@ -1,65 +1,76 @@
 # Product scope
 
-## Confirmed intent
+## Selected direction
 
-- Build a Rust Markdown preview application for notes edited in Neovim.
-- Provide live preview, with mathematical formulas a central requirement.
-- Initialize the repository and compare technology routes first.
-- Wait for the owner's route decision before implementing the application.
+The owner has selected and authorized implementation of:
 
-This phase contains project documentation, Git setup, and documentation checks.
-A successful repository check is not a working application baseline.
+- A separate, minimal desktop preview window for Markdown written in Neovim.
+- Rust for application logic, with HTML/CSS/JavaScript for presentation.
+- Live updates while typing, including unsaved buffers.
+- Ordinary inline mathematical formulas; advanced LaTeX compatibility is not a
+  first-version requirement.
+- Multiple visual presets, defaulting to a translucent dark background and light
+  text matching the current Kitty/Neovim visual style.
+- A Linux and macOS design target, with macOS testing explicitly deferred.
+- Public synchronization to `singlelektron/md_viewer` on GitHub. Merge and release
+  publication are separate actions and have not been authorized.
 
-## Decisions still open
+The selected implementation is Tauri, Rust Markdown parsing, KaTeX, and a small
+Neovim Lua bridge over a child process's stdin. The earlier
+[technology evaluation](TECHNOLOGY_OPTIONS.md) is historical, not an unresolved
+architecture decision.
 
-The [technology evaluation](TECHNOLOGY_OPTIONS.md) contains recommendations,
-not approved architecture. In particular, the owner has not selected:
+## First-version behavior
 
-- An external browser, a desktop WebView window, or a native Rust GUI.
-- Refresh after saving versus updates from unsaved Neovim buffers.
-- KaTeX, MathJax, or another math renderer; required LaTeX commands and packages.
-- Whether JavaScript rendering assets are acceptable within a Rust application.
-- Supported operating systems; Linux is a working assumption for evaluation,
-  not a committed platform support matrix.
-- The Markdown dialect, math delimiters, macros, equation numbering/references,
-  and any compatibility expectations for existing notes.
-- Scroll following, multi-buffer behavior, exports, diagram support, and release scope.
-- Project license, remote repository, visibility, and publication.
+One preview process shows the selected Markdown buffer. Initial unsaved content,
+subsequent edits, and changes of active Markdown buffer send complete snapshots.
+A monotonically increasing revision prevents older input from replacing newer
+content. The previewer never writes the source note. Standalone file mode is also
+available and polls saved UTF-8 content; it cannot see an editor's unsaved buffer.
 
-## Proposed first implementation scope
+The Markdown surface includes headings, paragraphs, lists, code, blockquotes,
+and ordinary math. KaTeX assets/fonts are bundled for offline runtime use.
+Incomplete formulas produce local errors/source fallback while the rest of the
+note remains available. No arbitrary TeX package execution is provided.
 
-Subject to the owner's decision: one local Markdown document, readable headings,
-lists, code blocks, links and local images, inline/display math, and live updates
-that recover when a temporarily incomplete formula is corrected. Neovim remains
-the editor; the previewer should not rewrite the note.
+The three presets are Moonlit (default translucent dark), Graphite (opaque dark),
+and Paper (light). The default uses Kitty's inspected background `#18131f` at
+0.86 opacity and foreground `#f1e8f1`. Theme selection lasts for the current viewer
+session. Installed system fonts are used for interface/text, with fallbacks;
+matching font availability across operating systems is not guaranteed.
 
-Suggested boundaries are offline rendering with bundled assets, no note upload
-or telemetry, and explicit access only to the selected document and permitted
-relative assets. Raw HTML and external-resource policies need to be specified
-before implementation. These are proposals, not existing capabilities.
+Input is limited to 1 MiB of note text and a 2 MiB encoded protocol frame. Raw
+HTML is treated as text; images are omitted and external links do not navigate.
+There is no runtime server, note upload, or remote asset loading. Neovim setup is
+opt-in; existing editor configuration, commands, and mappings remain untouched.
 
-Cloud synchronization, a replacement editor, arbitrary LaTeX package execution,
-and a full TeX distribution are outside the proposed first version.
+## Observable acceptance cases
 
-## Proposed observable acceptance cases
+1. Open a Unicode note containing `$x^2 + y^2 = z^2$`, a fraction, headings, and
+   code. Verify readable text and correctly rendered inline formulas.
+2. Type without saving, including while a completion popup is visible, and see
+   the current text in the preview. Verify the disk file remains unchanged.
+3. Leave a formula temporarily incomplete, then correct it. The surrounding
+   document stays usable and the formula recovers.
+4. Switch Markdown buffers during a burst of edits; the previous buffer's pending
+   update must not replace the newly selected note. Stop/restart and reload must
+   recover through a complete snapshot.
+5. Switch each preset and inspect readable controls/content. The default window
+   should show translucency on the actual Linux desktop, not just an RGBA CSS value.
+6. Run without networking and verify math/fonts work. External content and raw
+   HTML must not execute or navigate the privileged WebView.
+7. In file mode, change or atomically replace a note and verify the preview updates.
 
-Agree on representative notes and the supported syntax before turning these into
-release criteria. No behavioral test below has run in this planning phase.
+Tests and manual checks must be reported separately. Linux checks cannot establish
+macOS behavior, and both platform support and transparency require real platform
+validation before stronger claims. Debounce/poll intervals are implementation
+settings, not measured end-to-end latency guarantees.
 
-1. Preview a local Unicode note containing inline math, display math, fractions,
-   sums, integrals, matrices, aligned equations, and the owner's common macros.
-2. If unsaved updates are selected, edit in Insert mode without saving and see
-   the current buffer; otherwise explicitly verify refresh after `:write`.
-3. Temporarily leave braces or delimiters incomplete; show a local error or
-   source fallback, keep the rest of the note usable, and recover after correction.
-4. If numbering/references are selected, insert/delete earlier equations and
-   verify that later numbers and references update without stale state.
-5. Handle repeated saves, atomic file replacement, buffer switching, reconnects,
-   and UTF-8 text without stale content overwriting newer updates.
-6. If offline/private operation is selected, disconnect networking, render math
-   and fonts, and verify that note bytes remain unchanged and no remote assets load.
-7. If scroll following is selected, check it after formula/font layout settles,
-   including edits above the viewport and manual scrolling in the preview.
+## Deferred scope
 
-Latency, memory use, and supported document size need measurements on agreed
-fixtures and target hardware; no performance numbers are promised here.
+Complex LaTeX packages, equation-reference systems, image handling, exports,
+editing inside the preview, multi-window sessions, cloud synchronization, and
+cursor-synchronized scrolling are not first-version commitments. Ordinary preview
+scroll position is preserved where practical; exact source-to-preview mapping is
+not promised. macOS tests, signed installers, release packaging, and the project
+license remain open.
