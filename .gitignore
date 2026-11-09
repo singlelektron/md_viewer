@@ -1,0 +1,18 @@
+# Rust build output; retain Cargo.lock when an application package is created.
+/target/
+
+# Local tooling state and credentials.
+/.agents/
+/.codex/
+/.aws/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+
+# Editor recovery and OS metadata.
+*.swp
+*.swo
+*~
+.DS_Store
