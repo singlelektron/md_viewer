@@ -14,6 +14,10 @@
       "minWidth": 360,
       "minHeight": 280,
       "transparent": true,
+      "windowEffects": {
+        "effects": ["underWindowBackground"],
+        "state": "active"
+      },
       "backgroundColor": "#00000000"
     }],
     "security": {

@@ -1,0 +1,10 @@
+// Niri 26.04+: opt-in compositor blur for md_viewer's transparent Moonlit theme.
+// Include this fragment from your Niri configuration; the application never
+// installs it automatically. Graphite and Paper cover it with opaque backgrounds.
+window-rule {
+    match app-id="^md-viewer$"
+    background-effect {
+        blur true
+        xray true
+    }
+}

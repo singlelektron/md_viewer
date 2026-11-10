@@ -8,6 +8,8 @@ The default **Moonlit** theme follows the owner's Kitty palette: translucent
 `#18131f` at 86% opacity, `#f1e8f1` text, and a muted rose accent. **Graphite** is
 an opaque dark alternative; **Paper** is a light alternative. Theme selection is
 per session. No terminal or editor settings are modified.
+Moonlit supports a frosted background through native macOS material or an
+[opt-in Niri blur rule](docs/OWNER_GUIDE.md); desktop blur needs compositor support.
 
 Linux is the current validation platform. macOS is a design/build target using
 Tauri's system WebView; macOS compilation, runtime, and appearance tests are

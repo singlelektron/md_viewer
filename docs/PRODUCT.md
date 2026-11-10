@@ -44,6 +44,13 @@ and Paper (light). The default uses Kitty's inspected background `#18131f` at
 session. Installed system fonts are used for interface/text, with fallbacks;
 matching font availability across operating systems is not guaranteed.
 
+Moonlit also uses native background blur where supported. On Niri 26.04+ this
+is an opt-in, application-specific compositor rule, matching the owner's Kitty
+xray blur (blurred wallpaper). macOS is configured for the native
+`underWindowBackground` material; its appearance and runtime remain untested.
+Other Linux compositors require their own blur support/configuration. Opaque
+themes cover the effect. CSS alone does not blur the desktop behind a WebView.
+
 Input is limited to 1 MiB of note text and a 2 MiB encoded protocol frame.
 Embedded HTML supports a sanitized formatting subset: paragraphs/headings,
 `br`, emphasis, `sub`/`sup`, `kbd`, `mark`, `div`/`span`, lists, blockquotes,

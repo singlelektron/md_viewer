@@ -24,6 +24,33 @@ appearance also depends on the compositor, WebView, and installed fonts. macOS
 is a supported design target whose tests are deferred; it is not verified by
 Linux screenshots or build results.
 
+### Frosted Moonlit background
+
+On Niri 26.04+, include [the application-specific blur rule](../integrations/niri.kdl)
+from your personal Niri configuration, using your checkout's absolute path:
+
+```kdl
+include "/absolute/path/to/md_viewer/integrations/niri.kdl"
+```
+
+Run `niri validate` before reloading. Niri normally reloads configuration changes
+automatically. The rule matches the Linux window app ID `md-viewer`, enables
+blurred-wallpaper (xray) rendering like Kitty, and preserves the existing 0.86
+Moonlit tint. Graphite and Paper remain opaque. Remove the include to undo this
+opt-in setup. The app does not edit compositor settings at startup or install time.
+For the owner's current machine, the same rule is included through the personal
+`dotfiles-local/niri.kdl` override; the managed desktop configuration is unchanged.
+
+macOS uses Tauri's native `underWindowBackground` material behind the transparent
+WebView. macOS verification remains deferred. Other Linux desktops may need a
+different compositor rule; plain transparency is the fallback without blur support.
+See [Niri window effects](https://niri-wm.github.io/niri/Window-Effects.html) and
+[Tauri window effects](https://v2.tauri.app/reference/config/#windoweffectsconfig).
+
+WebView-only screenshots do not include compositor blur. Check the actual
+composited window against a detailed wallpaper; text should remain sharp while
+the wallpaper behind the Moonlit background is softened.
+
 The note follows the window width. Very long unbroken formulas remain readable
 through horizontal scrolling. Common HTML formatting works inside Markdown:
 
