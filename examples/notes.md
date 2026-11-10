@@ -31,3 +31,14 @@ fn main() {
 | Rust | Document state and Markdown |
 | KaTeX | Mathematical notation |
 | Neovim | Your editor |
+
+## A little HTML
+
+Water: H<sub>2</sub>O<br>Another line with <mark>highlighted text</mark> and <kbd>Esc</kbd>.
+
+<details>
+<summary>Show an explanation</summary>
+
+Keep **Markdown** and ordinary math: $x^2 + y^2 = z^2$。
+
+</details>

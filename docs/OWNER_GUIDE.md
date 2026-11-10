@@ -24,6 +24,26 @@ appearance also depends on the compositor, WebView, and installed fonts. macOS
 is a supported design target whose tests are deferred; it is not verified by
 Linux screenshots or build results.
 
+The note follows the window width. Very long unbroken formulas remain readable
+through horizontal scrolling. Common HTML formatting works inside Markdown:
+
+```markdown
+Water: H<sub>2</sub>O<br>Another line with <mark>highlighted text</mark>.
+
+<details>
+<summary>Show explanation</summary>
+
+An ordinary **Markdown paragraph** with $x^2 + y^2 = z^2$.
+
+</details>
+
+<p align="center">Centered text</p>
+```
+
+Keep the blank lines inside the disclosure when using Markdown or dollar math.
+See the [supported HTML policy](PRODUCT.md) for the formatting and attribute
+boundaries; inline styles and scripts are not supported.
+
 ## Verification
 
 From the repository root:
@@ -54,7 +74,8 @@ python3 tests/test_desktop.py
 
 This opens disposable preview windows and a clean Neovim, sends unsaved text
 through the Lua bridge and a test pipe relay into the real application, and
-checks native KaTeX layout, themes, saved-file replacement, error recovery, and
+checks native KaTeX layout, width/punctuation regressions, safe HTML disclosure
+interaction, themes, saved-file replacement, error recovery, and
 unchanged note bytes. Reports and window screenshots go to ignored
 `artifacts/desktop/`. No personal notes or editor settings are used. Inspect the
 screenshots too: DOM presence alone does not prove visible formula glyphs.

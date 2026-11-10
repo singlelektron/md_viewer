@@ -118,20 +118,90 @@ pub fn render_markdown(source: &str) -> String {
             )
             .into(),
         ),
-        Event::Html(text) | Event::InlineHtml(text) => Event::Text(text),
         other => other,
     });
     let mut rendered = String::new();
     html::push_html(&mut rendered, events);
-    // No remote or local images are loaded; raw HTML is text, links remain inert
-    // in the view, and a strict CSP is a second boundary around document content.
+    // Sanitize the complete document so paired raw HTML tags can span Markdown
+    // events. No resource, navigation, arbitrary styling, or application IDs.
     ammonia::Builder::default()
-        .rm_tags(&["img"])
-        // DOM click handlers alone do not cover a native WebView's link menu.
-        .rm_tag_attributes("a", &["href"])
-        .add_tag_attributes("span", &["class", "data-tex"])
-        .add_tag_attributes("div", &["class", "data-tex"])
-        .add_tag_attributes("code", &["class"])
+        .tags(
+            [
+                "a",
+                "abbr",
+                "b",
+                "blockquote",
+                "br",
+                "caption",
+                "center",
+                "code",
+                "dd",
+                "del",
+                "details",
+                "div",
+                "dl",
+                "dt",
+                "em",
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "hr",
+                "i",
+                "kbd",
+                "li",
+                "mark",
+                "ol",
+                "p",
+                "pre",
+                "s",
+                "small",
+                "span",
+                "strong",
+                "sub",
+                "summary",
+                "sup",
+                "table",
+                "tbody",
+                "td",
+                "tfoot",
+                "th",
+                "thead",
+                "tr",
+                "u",
+                "ul",
+            ]
+            .into(),
+        )
+        .tag_attributes(std::collections::HashMap::from([
+            ("span", ["class", "data-tex"].into()),
+            ("div", ["class", "data-tex", "align"].into()),
+            ("code", ["class"].into()),
+            ("p", ["align"].into()),
+            ("details", ["open"].into()),
+            ("ol", ["start"].into()),
+            ("li", ["value"].into()),
+            ("td", ["colspan", "rowspan", "align"].into()),
+            ("th", ["colspan", "rowspan", "align", "scope"].into()),
+        ]))
+        .attribute_filter(|element, attribute, value| match (element, attribute) {
+            ("span", "class") if value == "math-inline" => Some(value.into()),
+            ("div", "class") if value == "math-display" => Some(value.into()),
+            ("code", "class")
+                if value.starts_with("language-")
+                    && value
+                        .chars()
+                        .all(|c| c.is_ascii_alphanumeric() || "-_+.".contains(c)) =>
+            {
+                Some(value.into())
+            }
+            (_, "class") => None,
+            (_, "align") if !matches!(value, "left" | "center" | "right") => None,
+            _ => Some(value.into()),
+        })
+        .link_rel(None)
         .clean(&rendered)
         .to_string()
 }
@@ -198,6 +268,44 @@ mod tests {
             .unwrap();
         assert!(!math_tag.contains(" onmouseover=\""));
         assert!(html.contains("&quot;"));
+    }
+
+    #[test]
+    fn safe_html_formats_notes_without_allowing_active_content_or_app_styling() {
+        let html = render_markdown(concat!(
+            "Water H<sub>2</sub>O, x<sup>2</sup><br><kbd>Esc</kbd> <mark>highlight</mark>\n\n",
+            "<details open><summary>More</summary>\n\n**bold** and $x^2$.\n\n</details>\n\n",
+            "<div align=\"center\" class=\"toolbar\" id=\"theme\" style=\"position:fixed\" onclick=\"evil()\">Title</div>\n\n",
+            "<table><tr><td colspan=\"2\" align=\"right\">cell</td></tr></table>\n\n",
+            "<a href=\"file:///tmp/note\" target=\"_blank\">link</a>\n\n",
+            "<script>evil()</script><style>body{display:none}</style>",
+            "<iframe src=\"https://example.com\"></iframe><img src=\"file:///tmp/a\">",
+            "<svg onload=\"evil()\"></svg><form action=\"https://example.com\"><input autofocus></form>",
+        ));
+        for expected in [
+            "<sub>2</sub>",
+            "<sup>2</sup>",
+            "<br>",
+            "<kbd>Esc</kbd>",
+            "<mark>highlight</mark>",
+            "<details open=\"\">",
+            "<summary>More</summary>",
+            "<strong>bold</strong>",
+            "class=\"math-inline\"",
+            "<div align=\"center\">Title</div>",
+            "colspan=\"2\"",
+            "align=\"right\"",
+            "<a>link</a>",
+        ] {
+            assert!(html.contains(expected), "Missing {expected}: {html}");
+        }
+        for forbidden in [
+            "<script", "<style", "<iframe", "<img", "<svg", "<form", "<input", "href=", "src=",
+            "onclick=", "onload=", "style=", "id=", "toolbar", "evil()",
+        ] {
+            assert!(!html.contains(forbidden), "Unexpected {forbidden}: {html}");
+        }
+        assert!(render_markdown("`<br>`").contains("<code>&lt;br&gt;</code>"));
     }
 
     #[test]

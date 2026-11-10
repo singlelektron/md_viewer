@@ -42,8 +42,11 @@ unnamed notes work after `:setfiletype markdown`, without an initial save.
 
 Inline formulas such as `$x^2 + y^2 = z^2$` render locally. The first version
 focuses on ordinary formulas, not arbitrary LaTeX packages or equation-reference
-systems. Raw HTML is displayed as text, images are omitted, and external links
-are inert. There is no note upload, runtime asset download, or local HTTP server.
+systems. Content follows the window width, with unbroken inline formulas and
+attached sentence punctuation. A [safe HTML subset](docs/PRODUCT.md) supports
+line breaks, subscripts/superscripts, highlights, tables, and disclosure blocks.
+Images are omitted and links are inert. There is no note upload, runtime asset
+download, or local HTTP server.
 
 ## Development and scope
 

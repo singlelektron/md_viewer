@@ -77,6 +77,53 @@
         node.classList.add("katex-error");
       }
     }
+    keepMathPunctuation();
+  }
+
+  function keepMathPunctuation() {
+    // WebKit can break after an atomic formula even before closing punctuation.
+    // Keep that suffix in one inline box, preserving its original markup and text.
+    for (const math of content.querySelectorAll(".math-inline")) {
+      let next = math;
+      while (next) {
+        if (next.nextSibling) {
+          next = next.nextSibling;
+          while (next.nodeType === Node.ELEMENT_NODE &&
+                 getComputedStyle(next).display === "inline" && next.firstChild) {
+            next = next.firstChild;
+          }
+          break;
+        }
+        next = next.parentElement;
+        if (!next || next === content || getComputedStyle(next).display !== "inline") {
+          next = null;
+        }
+      }
+      if (next?.nodeType !== Node.TEXT_NODE) continue;
+      const suffix = next.textContent.match(/^[ \t\r\n]*[.,;:!?…。，、；：！？）)\]】》〉」』”’]+/u)?.[0];
+      if (!suffix) continue;
+
+      const range = document.createRange();
+      range.setStartBefore(math);
+      range.setEnd(next, suffix.length);
+      const parent = range.commonAncestorContainer;
+      const group = document.createElement("span");
+      group.className = "math-run";
+      if (math.parentNode === parent && next.parentNode === parent) {
+        group.append(range.extractContents());
+        range.insertNode(group);
+        continue;
+      }
+      // Split partial emphasis/span ancestors at the boundary rather than moving
+      // punctuation into the formula's style or making the whole paragraph nowrap.
+      const before = document.createRange();
+      before.selectNodeContents(parent);
+      before.setEndBefore(math);
+      const prefix = before.extractContents();
+      range.setStart(parent, 0);
+      group.append(range.extractContents());
+      parent.prepend(prefix, group);
+    }
   }
 
   function applyPreview(preview) {

@@ -27,7 +27,7 @@ function harness() {
       hidden: false, scrollTop: 0, value: "moonlit", mathNodes: [],
       addEventListener(name, callback) { this.listeners[name] = callback; },
       getBoundingClientRect() { return { top: 0, bottom: 100 }; },
-      querySelectorAll(selector) { return selector.startsWith(".math") ? this.mathNodes : []; },
+      querySelectorAll(selector) { return selector === ".math-inline, .math-display" ? this.mathNodes : []; },
     });
   }
   const initial = deferred();

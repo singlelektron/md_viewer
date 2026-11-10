@@ -183,6 +183,87 @@ def main():
                 wait_for(lambda: js("return document.querySelector('#document').textContent.includes('Recovered') && !document.querySelector('#error').textContent"),
                          "file recovery")
                 checks.append("Saved-file replacement, missing-file error, and recovery")
+
+                note.write_text(
+                    "# Responsive typography\n\n"
+                    "中文测试文字。中文末尾标点！中文括号（测试）。\n\n"
+                    "Inline formula $a+b+c+d=e+f+g+h$。\n\n"
+                    "Emphasized **$a+b=c+d$**，next.\n\n"
+                    "English formula $a+b=c+d$.) Next.\n\n"
+                    "Mixed **prefix $x+y=z$. middle $a+b=c+d$**。 suffix\n\n"
+                    "Styled $x+y=z$<em>。</em> suffix\n\n"
+                    "Hard break $x+y=z$<br>。\n\n"
+                    "Oversized $a+b+c+d+e+f+g+h+i+j+k=l+m+n+o+p+q+r+s+t$。\n\n"
+                    "Water H<sub>2</sub>O<br>second line <kbd>Esc</kbd> <mark>highlight</mark>\n\n"
+                    "<details><summary>More</summary>\n\n**Hidden content** and $x^2$.\n\n</details>\n\n"
+                    "<div align=\"center\">Centered HTML</div>\n\n"
+                    "<table><tr><td colspan=\"2\">HTML cell</td></tr></table>\n",
+                    encoding="utf-8")
+                wait_for(lambda: js("return document.querySelector('#document').textContent.includes('Responsive typography')"),
+                         "responsive HTML fixture")
+                wait_for(lambda: js("return document.fonts.status === 'loaded'"), "typography fonts")
+                assert js("return !!document.querySelector('#document sub') && !!document.querySelector('#document br') && !!document.querySelector('#document kbd') && !!document.querySelector('#document mark')")
+                assert js("return document.querySelector('#document td').colSpan === 2")
+                assert js("return getComputedStyle(document.querySelector('#document div[align]')).textAlign === 'center'")
+                assert js("return !!document.querySelector('#document .math-run > em')")
+                assert js("""
+                    const clone = document.querySelector('#document').cloneNode(true);
+                    for (const node of clone.querySelectorAll('.math-inline')) node.replaceWith('$' + node.dataset.tex + '$');
+                    return clone.textContent.includes('Mixed prefix $x+y=z$. middle $a+b=c+d$。 suffix') &&
+                      [...clone.querySelectorAll('strong')].some(e => e.textContent === '$a+b=c+d$') &&
+                      [...document.querySelectorAll('#document p')].find(p=>p.textContent.startsWith('Hard break')).querySelectorAll('.math-run').length === 0;
+                """)
+                summary = request("POST", f"/session/{session}/element", {
+                    "using": "css selector", "value": "#document summary"})
+                request("POST", f"/session/{session}/element/{summary['element-6066-11e4-a52e-4f735466cecf']}/click", {})
+                assert js("return document.querySelector('#document details').open")
+
+                # Sweep constrained content widths in the actual WebView. This is
+                # independent of whether the tiling compositor honors window resize.
+                typography = js("""
+                    const content = document.querySelector('#document');
+                    const viewport = document.querySelector('#viewport');
+                    const failures = [];
+                    const rect = (node, start, end) => {
+                      const range = document.createRange();
+                      range.setStart(node, start); range.setEnd(node, end);
+                      return range.getBoundingClientRect();
+                    };
+                    for (let width = 280; width <= 1100; width += 7) {
+                      viewport.style.width = width + 'px';
+                      if (Math.abs(content.getBoundingClientRect().width - width) > 1)
+                        failures.push({width, problem:'content does not fill available width'});
+                      for (const math of content.querySelectorAll('p .math-inline')) {
+                        const bases = [...math.querySelectorAll('.katex-html > .katex-base')].map(e=>e.getBoundingClientRect());
+                        if (math.getClientRects().length !== 1 || Math.max(...bases.map(r=>r.top)) - Math.min(...bases.map(r=>r.top)) > 10)
+                          failures.push({width, problem:'inline formula split', text:math.dataset.tex});
+                        // Find following text even through an emphasis boundary.
+                        let next = math;
+                        while (next && !next.nextSibling && next.parentElement !== content) next = next.parentElement;
+                        next = next?.nextSibling;
+                        if (next?.nodeType === Node.TEXT_NODE && /^[。，.!]/u.test(next.textContent)) {
+                          const punctuation = rect(next,0,1), formula = math.getBoundingClientRect();
+                          if (punctuation.top >= formula.bottom || punctuation.bottom <= formula.top)
+                            failures.push({width, problem:'punctuation detached from math', text:next.textContent});
+                        }
+                      }
+                      const text = content.querySelector('p').firstChild;
+                      for (let i=1; i<text.length; i++) {
+                        if (/[。！（）]/u.test(text.data[i]) && text.data[i] !== '（' &&
+                            Math.abs(rect(text,i,i+1).top - rect(text,i-1,i).top) > 2)
+                          failures.push({width, problem:'orphaned CJK punctuation', text:text.data[i]});
+                      }
+                    }
+                    viewport.style.width = '280px';
+                    if (viewport.scrollWidth <= viewport.clientWidth)
+                      failures.push({problem:'oversized unbroken formula is not horizontally reachable'});
+                    viewport.style.removeProperty('width');
+                    viewport.scrollTop = 0;
+                    return failures.slice(0, 20);
+                """)
+                assert not typography, typography
+                screenshot("responsive-html.png")
+                checks.append("Full-width layout at 280–1100px, unbroken inline formulas and attached punctuation; safe HTML and real disclosure click")
                 close_app()
 
                 # Real Neovim buffer -> bundled Lua -> pipe relay -> Rust -> native
@@ -239,7 +320,7 @@ def main():
                 assert js("return !window.noteExecuted && !document.querySelector('#document img')")
                 assert js("return !document.querySelector('#document a[href]')")
                 assert js("return performance.getEntriesByType('resource').every(e => !/^https?:/.test(e.name))")
-                checks.append("Incomplete formula recovery, inert raw HTML, and no HTTP resource loads")
+                checks.append("Incomplete formula recovery, stripped active HTML, and no HTTP resource loads")
                 assert note.read_text(encoding="utf-8") == original
                 close_app()
             except Exception:

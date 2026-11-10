@@ -152,7 +152,7 @@ body {
 #viewport {
   flex: 1;
   min-height: 0;
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
@@ -163,10 +163,11 @@ body {
 #viewport:focus-visible { outline-offset: -3px; }
 
 .markdown {
-  max-width: 78ch;
+  width: 100%;
   padding: 36px 34px 72px;
   margin: 0 auto;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
+  line-break: strict;
   line-height: 1.85;
 }
 
@@ -261,9 +262,20 @@ body {
 }
 
 .markdown th { background: var(--code-background); font-weight: 600; }
+.markdown [align="center"] { text-align: center; }
+.markdown [align="right"] { text-align: right; }
+.markdown [align="left"] { text-align: left; }
+.markdown details { margin: 1.05em 0; }
+.markdown summary { cursor: pointer; color: var(--accent); }
+.markdown kbd { padding: 0.1em 0.35em; border: 1px solid var(--border); border-radius: 3px; font: inherit; }
+.markdown mark { background: var(--selection); color: var(--foreground); }
 .markdown img { max-width: 100%; height: auto; }
 .markdown input[type="checkbox"] { accent-color: var(--accent); }
-.markdown .math-inline { overflow-wrap: normal; }
+.markdown .math-inline, .markdown .math-run {
+  display: inline-block;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
 .markdown .math-display { overflow-x: auto; overflow-y: hidden; padding: 0.2em 0; }
 .markdown .katex { font-size: 1.13em; }
 .markdown .katex-error { color: var(--error) !important; font-size: 0.9em; }
@@ -283,7 +295,7 @@ body {
 .empty-detail { padding-top: 14px; font-size: 11px; }
 
 .error {
-  max-width: 78ch;
+  width: 100%;
   margin: 18px auto 0;
   padding: 10px 34px;
   color: var(--error);

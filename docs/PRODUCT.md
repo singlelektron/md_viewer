@@ -33,14 +33,27 @@ and ordinary math. KaTeX assets/fonts are bundled for offline runtime use.
 Incomplete formulas produce local errors/source fallback while the rest of the
 note remains available. No arbitrary TeX package execution is provided.
 
+Content fills the available window width with modest padding. Inline formulas
+stay on one line, and following sentence punctuation stays with the formula.
+Normal prose uses strict punctuation line breaking. Oversized unbroken content
+can be scrolled horizontally instead of being clipped or shrinking the text.
+
 The three presets are Moonlit (default translucent dark), Graphite (opaque dark),
 and Paper (light). The default uses Kitty's inspected background `#18131f` at
 0.86 opacity and foreground `#f1e8f1`. Theme selection lasts for the current viewer
 session. Installed system fonts are used for interface/text, with fallbacks;
 matching font availability across operating systems is not guaranteed.
 
-Input is limited to 1 MiB of note text and a 2 MiB encoded protocol frame. Raw
-HTML is treated as text; images are omitted and external links do not navigate.
+Input is limited to 1 MiB of note text and a 2 MiB encoded protocol frame.
+Embedded HTML supports a sanitized formatting subset: paragraphs/headings,
+`br`, emphasis, `sub`/`sup`, `kbd`, `mark`, `div`/`span`, lists, blockquotes,
+code, tables, and `details`/`summary`. Table cell spans, ordered list numbering,
+`details open`, and `align="left|center|right"` on paragraphs, divs, and table
+cells are preserved. Standard CommonMark rules apply: use blank lines around
+Markdown inside HTML blocks; dollar math inside a raw HTML block is literal.
+Code spans/fences continue to display HTML literally. Scripts, event handlers,
+arbitrary CSS/classes/IDs, embedded media, and forms are stripped. Images are
+omitted and links have no navigation target, including native context menus.
 There is no runtime server, note upload, or remote asset loading. Neovim setup is
 opt-in; existing editor configuration, commands, and mappings remain untouched.
 
@@ -60,6 +73,9 @@ opt-in; existing editor configuration, commands, and mappings remain untouched.
 6. Run without networking and verify math/fonts work. External content and raw
    HTML must not execute or navigate the privileged WebView.
 7. In file mode, change or atomically replace a note and verify the preview updates.
+8. Resize the preview: content uses the available width; inline formulas do not
+   split and sentence punctuation does not wrap alone. Try HTML line breaks,
+   subscripts, and a clickable disclosure block without enabling active content.
 
 Tests and manual checks must be reported separately. Linux checks cannot establish
 macOS behavior, and both platform support and transparency require real platform
