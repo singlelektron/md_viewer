@@ -206,6 +206,21 @@ function M.setup(options)
   config = next_config
   local group = vim.api.nvim_create_augroup("MdViewer", { clear = true })
   vim.api.nvim_create_autocmd("BufEnter", { group = group, callback = function(args) follow(args.buf) end })
+  vim.api.nvim_create_autocmd("FileType", {
+    group = group,
+    pattern = "markdown",
+    callback = function(args)
+      local session = active
+      if not session then return end
+      -- Setting a background buffer's options may temporarily make it current.
+      -- Check after the event, when the real editor context has been restored.
+      vim.schedule(function()
+        if active == session and args.buf == vim.api.nvim_get_current_buf() then
+          follow(args.buf)
+        end
+      end)
+    end,
+  })
   vim.api.nvim_create_autocmd({ "BufWritePost", "BufFilePost", "BufModifiedSet" }, {
     group = group,
     callback = function(args)

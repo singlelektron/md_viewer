@@ -211,19 +211,21 @@ def main():
                 wait_for(lambda: js("return document.querySelector('#document').textContent.includes('On disk')"),
                          "initial editor snapshot")
 
-                def edit(lines):
+                def edit(lines, prelude=""):
                     action = work / "edit.lua"
-                    action.write_text("vim.api.nvim_buf_set_lines(0,0,-1,false,"
+                    action.write_text(prelude + "vim.api.nvim_buf_set_lines(0,0,-1,false,"
                                       + "{" + ",".join(json.dumps(line, ensure_ascii=False) for line in lines)
                                       + "})\n", encoding="utf-8")
                     expression = "execute('lua dofile(" + json.dumps(str(action)) + ")')"
                     subprocess.run(["nvim", "--server", str(editor_socket), "--remote-expr", expression],
                                    check=True, capture_output=True, timeout=10)
 
-                edit(["# 未保存 · Native preview", "", "实时公式 $\\frac{1}{2} + x^2$。"])
+                edit(["# 未保存 · Native preview", "", "实时公式 $\\frac{1}{2} + x^2$。"],
+                     "vim.cmd('enew')\nvim.cmd('setfiletype markdown')\n")
                 wait_for(lambda: js("return document.querySelector('#document').textContent.includes('未保存') && document.querySelector('#status').textContent.includes('unsaved') && document.querySelectorAll('#document .katex').length===1"),
                          "unsaved Unicode buffer and native formula rendering")
                 assert note.read_text(encoding="utf-8") == original
+                assert js("return document.querySelector('#document-title').textContent === '[No Name]'")
                 screenshot("neovim-unsaved.png")
                 checks.append("Real Neovim unsaved Unicode edits reached Rust and native KaTeX; saved bytes unchanged")
 

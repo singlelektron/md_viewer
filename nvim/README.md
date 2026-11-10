@@ -30,6 +30,9 @@ Open a Markdown buffer and use:
 
 An unnamed note works after `:setfiletype markdown`; no initial save is needed.
 While the preview is running it follows entered Markdown buffers. Entering a
+new buffer with `:enew` and then `:setfiletype markdown` also switches the preview,
+without another start command. Changing a background buffer's filetype does not
+select it. Entering a
 non-Markdown buffer leaves the last note selected. Buffer callbacks cover edits
 without relying on `TextChangedI`, so completion-popup edits also trigger updates.
 Reloads, undo/redo, renames, and the modified indicator refresh automatically.

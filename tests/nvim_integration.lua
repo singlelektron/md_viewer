@@ -111,14 +111,17 @@ local function run()
   -- Queue an old note update, then change buffers before its debounce expires.
   vim.api.nvim_buf_set_lines(original, 0, -1, false, { "Stale queued text" })
   vim.cmd.enew()
-  vim.bo.filetype = "markdown"
+  vim.cmd("setfiletype markdown")
   vim.api.nvim_buf_set_lines(0, 0, -1, false, { "Unnamed note: $z$" })
-  -- Starting an already running viewer selects the current buffer as well.
-  assert(viewer.start())
+  -- FileType must follow an unnamed note without another start command.
   local second = await_text("Unnamed note: $z$")
   assert(second.message.name == "[No Name]")
   assert(second.pid == first.pid, "switch should reuse the window process")
+  local background = vim.api.nvim_create_buf(true, false)
+  vim.api.nvim_buf_set_lines(background, 0, -1, false, { "Background note" })
+  vim.bo[background].filetype = "markdown"
   vim.wait(100)
+  assert(updates()[#messages].message.text == "Unnamed note: $z$", "background FileType stole preview")
   for _, record in ipairs(updates()) do
     assert(record.message.text ~= "Stale queued text", "stale buffer timer escaped")
   end
