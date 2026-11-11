@@ -34,7 +34,8 @@ def main():
         return 1
     root = Path(__file__).resolve().parents[1]
     with tempfile.TemporaryDirectory(prefix="md-viewer-nvim-") as temporary:
-        directory = Path(temporary)
+        # Neovim resolves macOS /var -> /private/var in buffer names.
+        directory = Path(temporary).resolve()
         (directory / "saved note.md").write_text("Saved original.\n", encoding="utf-8")
         environment = dict(os.environ)
         environment.update({

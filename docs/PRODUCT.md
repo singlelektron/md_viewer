@@ -11,7 +11,8 @@ The owner has selected and authorized implementation of:
   first-version requirement.
 - Multiple visual presets, defaulting to a translucent dark background and light
   text matching the current Kitty/Neovim visual style.
-- A Linux and macOS design target, with macOS testing explicitly deferred.
+- A Linux and macOS design target. The owner subsequently requested local macOS
+  testing; measured coverage is recorded in [macOS validation](MACOS_VALIDATION.md).
 - Public synchronization to `singlelektron/md_viewer` on GitHub. Merge and release
   publication are separate actions and have not been authorized.
 
@@ -47,7 +48,7 @@ matching font availability across operating systems is not guaranteed.
 Moonlit also uses native background blur where supported. On Niri 26.04+ this
 is an opt-in, application-specific compositor rule, matching the owner's Kitty
 xray blur (blurred wallpaper). macOS is configured for the native
-`underWindowBackground` material; its appearance and runtime remain untested.
+`underWindowBackground` material; desktop blur acceptance remains unverified.
 Other Linux compositors require their own blur support/configuration. Opaque
 themes cover the effect. CSS alone does not blur the desktop behind a WebView.
 
@@ -95,5 +96,5 @@ Complex LaTeX packages, equation-reference systems, image handling, exports,
 editing inside the preview, multi-window sessions, cloud synchronization, and
 cursor-synchronized scrolling are not first-version commitments. Ordinary preview
 scroll position is preserved where practical; exact source-to-preview mapping is
-not promised. macOS tests, signed installers, release packaging, and the project
-license remain open.
+not promised. Broader macOS coverage beyond the [local smoke test](MACOS_VALIDATION.md),
+signed installers, release packaging, and the project license remain open.

@@ -21,8 +21,8 @@ session-only. To choose a startup theme from a terminal:
 
 Moonlit follows the inspected Kitty colors and 0.86 background opacity. Actual
 appearance also depends on the compositor, WebView, and installed fonts. macOS
-is a supported design target whose tests are deferred; it is not verified by
-Linux screenshots or build results.
+has a limited [local validation record](MACOS_VALIDATION.md); it is not verified
+by Linux screenshots or build results.
 
 ### Frosted Moonlit background
 
@@ -42,7 +42,8 @@ For the owner's current machine, the same rule is included through the personal
 `dotfiles-local/niri.kdl` override; the managed desktop configuration is unchanged.
 
 macOS uses Tauri's native `underWindowBackground` material behind the transparent
-WebView. macOS verification remains deferred. Other Linux desktops may need a
+WebView. The macOS smoke test does not establish composited blur acceptance.
+Other Linux desktops may need a
 different compositor rule; plain transparency is the fallback without blur support.
 See [Niri window effects](https://niri-wm.github.io/niri/Window-Effects.html) and
 [Tauri window effects](https://v2.tauri.app/reference/config/#windoweffectsconfig).
@@ -112,8 +113,8 @@ For desktop acceptance, launch the built app and perform the cases in
 switch notes, select each theme, check Linux translucency, and run without
 networking. Record the actual result and revision in the handoff or PR. Do not
 interpret documentation checks, a successful build, or mocked frontend tests as
-a rendered desktop acceptance result. macOS testing is intentionally excluded
-from this first verification round.
+a rendered desktop acceptance result. The Linux WebKitWebDriver script does not
+run on macOS; see the [separate native macOS checks](MACOS_VALIDATION.md).
 
 The documentation checker verifies required documents, final newlines, trailing
 whitespace, and simple inline links to local files. It does not fetch external
@@ -154,5 +155,5 @@ Work belongs on task branches; `main` began as an empty bootstrap baseline.
 Inspect the current PR/handoff for publication, hosted CI, and review results.
 A local workflow file does not establish a hosted pass or branch protection.
 Configured CI runs Linux build/lint, Rust core, frontend, and headless Neovim
-checks; the native desktop check is local and macOS checks are excluded.
+checks; native desktop checks are local and hosted macOS checks are not configured.
 Merging, signing, and publishing release installers remain separate decisions.

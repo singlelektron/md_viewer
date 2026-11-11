@@ -11,9 +11,9 @@ per session. No terminal or editor settings are modified.
 Moonlit supports a frosted background through native macOS material or an
 [opt-in Niri blur rule](docs/OWNER_GUIDE.md); desktop blur needs compositor support.
 
-Linux is the current validation platform. macOS is a design/build target using
-Tauri's system WebView; macOS compilation, runtime, and appearance tests are
-explicitly deferred. Cross-platform support is not a completed test result.
+Linux has automated CI coverage. A local Apple Silicon macOS build and native
+WebView smoke test passed; see the [macOS validation record](docs/MACOS_VALIDATION.md)
+for the tested environment, evidence, and remaining coverage limits.
 
 ## Build and open
 
