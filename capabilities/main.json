@@ -1,6 +1,11 @@
 {
   "identifier": "main",
-  "description": "The local preview may receive document events. No filesystem or shell APIs.",
+  "description": "The local preview may receive document events and move/zoom its own window. No filesystem or shell APIs.",
   "windows": ["main"],
-  "permissions": ["core:event:allow-listen", "core:event:allow-unlisten"]
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-start-dragging",
+    "core:window:allow-internal-toggle-maximize"
+  ]
 }

@@ -40,17 +40,29 @@ Normal prose uses strict punctuation line breaking. Oversized unbroken content
 can be scrolled horizontally instead of being clipped or shrinking the text.
 
 The three presets are Moonlit (default translucent dark), Graphite (opaque dark),
-and Paper (light). The default uses Kitty's inspected background `#18131f` at
-0.86 opacity and foreground `#f1e8f1`. Theme selection lasts for the current viewer
-session. Installed system fonts are used for interface/text, with fallbacks;
+and Paper (light). On Linux, Moonlit uses the earlier inspected Kitty background
+`#18131f` at 0.86 opacity and foreground `#f1e8f1`. On macOS, it follows the owner's
+current Kitty palette: background `#19151c` at 0.88 opacity, foreground `#ede5ec`,
+and rose accent `#f2a5c7`. These are tint values, not guarantees of identical
+composited pixels across different native blur implementations. Theme selection
+lasts for the current viewer session. Installed system fonts are used for
+interface/text, with fallbacks;
 matching font availability across operating systems is not guaranteed.
 
 Moonlit also uses native background blur where supported. On Niri 26.04+ this
 is an opt-in, application-specific compositor rule, matching the owner's Kitty
 xray blur (blurred wallpaper). macOS is configured for the native
-`underWindowBackground` material; desktop blur acceptance remains unverified.
+`hudWindow` material. The owner confirmed blurred color blocks behind the native
+window during the [local macOS appearance check](MACOS_VALIDATION.md); the final
+darker tint follows their subsequent Kitty-color correction.
 Other Linux compositors require their own blur support/configuration. Opaque
 themes cover the effect. CSS alone does not blur the desktop behind a WebView.
+
+On macOS, the native title bar overlays the toolbar instead of drawing a separate
+white strip. Native close/minimize/fullscreen controls remain available, with
+reserved space before the note title. The toolbar can drag the window and supports
+native double-click zoom behavior. Native light/dark appearance follows the
+selected preset. Linux keeps its normal window decorations.
 
 Input is limited to 1 MiB of note text and a 2 MiB encoded protocol frame.
 Embedded HTML supports a sanitized formatting subset: paragraphs/headings,

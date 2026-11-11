@@ -1,6 +1,10 @@
 "use strict";
 
 (() => {
+  // The macOS title bar overlays our toolbar; reserve its native window controls.
+  if (window.navigator?.platform?.startsWith("Mac")) {
+    document.documentElement.dataset.platform = "macos";
+  }
   const content = document.getElementById("document");
   const viewport = document.getElementById("viewport");
   const title = document.getElementById("document-title");

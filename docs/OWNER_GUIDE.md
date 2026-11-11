@@ -19,7 +19,7 @@ session-only. To choose a startup theme from a terminal:
 ./target/debug/md-viewer --theme graphite examples/notes.md
 ```
 
-Moonlit follows the inspected Kitty colors and 0.86 background opacity. Actual
+Moonlit follows the [platform-specific inspected Kitty colors](PRODUCT.md). Actual
 appearance also depends on the compositor, WebView, and installed fonts. macOS
 has a limited [local validation record](MACOS_VALIDATION.md); it is not verified
 by Linux screenshots or build results.
@@ -41,14 +41,16 @@ opt-in setup. The app does not edit compositor settings at startup or install ti
 For the owner's current machine, the same rule is included through the personal
 `dotfiles-local/niri.kdl` override; the managed desktop configuration is unchanged.
 
-macOS uses Tauri's native `underWindowBackground` material behind the transparent
-WebView. The macOS smoke test does not establish composited blur acceptance.
-Other Linux desktops may need a
-different compositor rule; plain transparency is the fallback without blur support.
+macOS uses Tauri's native `hudWindow` material behind the transparent WebView,
+with native dark appearance for Moonlit/Graphite and light appearance for Paper.
+The owner confirmed blurred color blocks on the real desktop during the
+[appearance check](MACOS_VALIDATION.md). The final Moonlit tint then matches their
+Kitty-color correction. Other Linux desktops may need a different compositor
+rule; plain transparency is the fallback without blur support.
 See [Niri window effects](https://niri-wm.github.io/niri/Window-Effects.html) and
 [Tauri window effects](https://v2.tauri.app/reference/config/#windoweffectsconfig).
 
-WebView-only screenshots do not include compositor blur. Check the actual
+WebView-only and isolated-window screenshots may not include compositor blur. Check the actual
 composited window against a detailed wallpaper; text should remain sharp while
 the wallpaper behind the Moonlit background is softened.
 

@@ -13,13 +13,13 @@
     <script defer src="app.js"></script>
   </head>
   <body>
-    <header class="toolbar">
-      <div class="document-identity">
-        <span class="document-mark" aria-hidden="true"></span>
-        <span id="document-title" class="document-title">md_viewer</span>
+    <header class="toolbar" data-tauri-drag-region>
+      <div class="document-identity" data-tauri-drag-region>
+        <span class="document-mark" aria-hidden="true" data-tauri-drag-region></span>
+        <span id="document-title" class="document-title" data-tauri-drag-region>md_viewer</span>
       </div>
       <div class="toolbar-controls">
-        <span id="status" class="status" role="status" aria-live="polite" data-connected="false">Connecting</span>
+        <span id="status" class="status" role="status" aria-live="polite" data-connected="false" data-tauri-drag-region>Connecting</span>
         <label class="theme-control">
           <span class="visually-hidden">Color theme</span>
           <select id="theme" aria-label="Color theme">
