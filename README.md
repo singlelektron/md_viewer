@@ -4,16 +4,19 @@ A quiet desktop Markdown preview for Neovim. Rust handles document state, input,
 and Markdown parsing; a Tauri window presents static HTML/CSS and bundled KaTeX.
 The interface stays small: note title, connection status, and a theme selector.
 
-The default **Moonlit** theme follows the owner's Kitty palette: translucent
-`#18131f` at 86% opacity, `#f1e8f1` text, and a muted rose accent. **Graphite** is
+The default **Moonlit** theme follows the owner's Kitty palette with a translucent
+dark background, light text, and a rose accent; [platform colors](docs/PRODUCT.md)
+reflect the inspected Linux and macOS configurations. **Graphite** is
 an opaque dark alternative; **Paper** is a light alternative. Theme selection is
 per session. No terminal or editor settings are modified.
 Moonlit supports a frosted background through native macOS material or an
 [opt-in Niri blur rule](docs/OWNER_GUIDE.md); desktop blur needs compositor support.
+On macOS, the toolbar blends into the window's top edge while retaining native
+window buttons, dragging, and double-click zoom.
 
-Linux is the current validation platform. macOS is a design/build target using
-Tauri's system WebView; macOS compilation, runtime, and appearance tests are
-explicitly deferred. Cross-platform support is not a completed test result.
+Linux has automated CI coverage. A local Apple Silicon macOS build and native
+WebView smoke test passed; see the [macOS validation record](docs/MACOS_VALIDATION.md)
+for the tested environment, evidence, and remaining coverage limits.
 
 ## Build and open
 

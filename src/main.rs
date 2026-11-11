@@ -13,6 +13,15 @@ use tauri::{Emitter, Manager, State};
 #[derive(Clone)]
 struct Shared(Arc<Mutex<Preview>>);
 
+#[cfg(target_os = "macos")]
+fn native_theme(theme: &str) -> tauri::Theme {
+    if theme == "paper" {
+        tauri::Theme::Light
+    } else {
+        tauri::Theme::Dark
+    }
+}
+
 #[tauri::command]
 fn get_preview(state: State<'_, Shared>) -> Preview {
     state.0.lock().expect("preview lock").clone()
@@ -26,6 +35,12 @@ fn set_theme(
 ) -> Result<Preview, String> {
     let mut preview = state.0.lock().map_err(|_| "Preview state unavailable")?;
     preview.set_theme(&theme)?;
+    #[cfg(target_os = "macos")]
+    if let Some(window) = app.get_webview_window("main") {
+        window
+            .set_theme(Some(native_theme(&theme)))
+            .map_err(|err| err.to_string())?;
+    }
     // Serialize emissions with edits so equal-revision theme events cannot race.
     app.emit("preview-updated", &*preview)
         .map_err(|err| err.to_string())?;
@@ -131,6 +146,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             frontend_ready
         ])
         .setup(move |app| {
+            #[cfg(target_os = "macos")]
+            if let Some(window) = app.get_webview_window("main") {
+                window.set_theme(Some(native_theme(&theme)))?;
+            }
             let handle = app.handle().clone();
             // Document navigation targets are removed by the Rust sanitizer.
             match mode {

@@ -11,7 +11,8 @@ Keep one authoritative home for each requirement and link to it elsewhere.
 
 The owner selected a minimal Tauri desktop window, Rust application logic,
 static web presentation, KaTeX for ordinary inline math, and live unsaved Neovim
-updates. Linux and macOS are design targets; macOS tests are explicitly deferred.
+updates. Linux and macOS are design targets; the limited local macOS evidence and
+remaining checks are recorded in [docs/MACOS_VALIDATION.md](docs/MACOS_VALIDATION.md).
 The default translucent Moonlit theme follows the inspected Kitty colors. Keep
 the app local/offline at runtime, source notes unchanged, and Neovim installation
 opt-in. Do not expand into advanced LaTeX or replace the user's editor workflow.
@@ -86,7 +87,7 @@ Use [.github/pull_request_template.md](.github/pull_request_template.md) for PRs
 or local handoffs. Report local checks, hosted CI, AI review, human acceptance,
 merge, and deployment separately. Do not claim a working product from structural
 checks. Desktop behavior needs actual WebView evidence. Do not infer macOS runtime
-support from Linux results; keep the owner's deferred testing boundary explicit.
+support from Linux results; keep the recorded macOS coverage limits explicit.
 
 When work and relevant checks are complete, use a normal review-ready PR; drafts
 are for incomplete work or requested early review. Let configured CI and available

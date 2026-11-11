@@ -327,3 +327,20 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; }
 }
+
+/* Keep the native macOS traffic lights clear at every window width. */
+:root[data-platform="macos"] .toolbar { padding-left: 88px; }
+
+/* Match the owner's current macOS Kitty palette and configured background opacity. */
+:root[data-platform="macos"][data-theme="moonlit"] {
+  --background: rgba(25, 21, 28, 0.88);
+  --surface: #241d29;
+  --foreground: #ede5ec;
+  --muted: #b3a2b1;
+  --accent: #f2a5c7;
+  --border: rgba(87, 66, 84, 0.58);
+  --selection: #3b2c3b;
+  --link: #a7b9ed;
+  --error: #f08091;
+  --code-background: rgba(36, 29, 41, 0.66);
+}

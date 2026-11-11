@@ -14,8 +14,11 @@
       "minWidth": 360,
       "minHeight": 280,
       "transparent": true,
+      "titleBarStyle": "Overlay",
+      "hiddenTitle": true,
+      "trafficLightPosition": { "x": 14, "y": 18 },
       "windowEffects": {
-        "effects": ["underWindowBackground"],
+        "effects": ["hudWindow"],
         "state": "active"
       },
       "backgroundColor": "#00000000"
