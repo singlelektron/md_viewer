@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" data-theme="moonlit">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <title>md_viewer</title>
+    <link rel="preload" href="vendor/katex/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="vendor/katex/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="vendor/katex/katex-swap.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="vendor/katex/katex.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header class="toolbar">
+      <div class="document-identity">
+        <span class="document-mark" aria-hidden="true"></span>
+        <span id="document-title" class="document-title">md_viewer</span>
+      </div>
+      <div class="toolbar-controls">
+        <span id="status" class="status" role="status" aria-live="polite" data-connected="false">Connecting</span>
+        <label class="theme-control">
+          <span class="visually-hidden">Color theme</span>
+          <select id="theme" aria-label="Color theme">
+            <option value="moonlit">Moonlit</option>
+            <option value="graphite">Graphite</option>
+            <option value="paper">Paper</option>
+          </select>
+        </label>
+      </div>
+    </header>
+    <main id="viewport" tabindex="0" aria-label="Markdown preview">
+      <div id="error" class="error" role="alert" hidden></div>
+      <section id="empty-state" class="empty-state" aria-labelledby="empty-title">
+        <p class="eyebrow">MARKDOWN PREVIEW</p>
+        <h1 id="empty-title">Open a note in Neovim.</h1>
+        <p>Run <code>:MdViewerStart</code> to preview as you type.</p>
+        <p class="empty-detail">Your note stays in your editor.</p>
+      </section>
+      <article id="document" class="markdown" aria-label="Rendered note" hidden></article>
+    </main>
+  </body>
+</html>
